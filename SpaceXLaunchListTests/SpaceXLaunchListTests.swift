@@ -28,7 +28,7 @@ class SpaceXLaunchListTests: XCTestCase {
         XCTAssertEqual(presenter.launchData.count, 3, "All element should be 3")
     }
     
-    func testSortByEmergency() {
+    func testSortByDate() {
         presenter.getLaunchData()
         presenter.sortByYear()
         let firstObjectDate = presenter.launchData.first?.launchYear
