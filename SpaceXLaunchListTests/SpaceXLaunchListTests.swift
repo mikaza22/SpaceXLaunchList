@@ -10,25 +10,53 @@ import XCTest
 @testable import SpaceXLaunchList
 
 class SpaceXLaunchListTests: XCTestCase {
-
+    
+    var view: LaunchListViewMock!
+    var service: LaunchDataServiceMock!
+    var presenter: LaunchListPresenter!
+    
     override func setUp() {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        service   = LaunchDataServiceMock()
+        view = LaunchListViewMock()
+        presenter = LaunchListPresenter(view: view, launchDataService: service)
     }
-
-    override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    
+    func testGetLaunchData() {
+        XCTAssertTrue(presenter.launchData.isEmpty, "List of launch should be empty before the request")
+        presenter.getLaunchData()
+        XCTAssertFalse(presenter.launchData.isEmpty, "List of launch should not be empty after the request")
+        XCTAssertEqual(presenter.launchData.count, 3, "All element should be 3")
     }
-
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    
+    func testSortByEmergency() {
+        presenter.getLaunchData()
+        presenter.sortByYear()
+        let firstObjectDate = presenter.launchData.first?.launchYear
+        let lastObjectDate = presenter.launchData.last?.launchYear
+        XCTAssertEqual(firstObjectDate, "2021", "The most recent date should be equal to 2021")
+        XCTAssertEqual(lastObjectDate, "2018", "The oldest date should be equal to 2018")
     }
+    
+}
 
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
+// MARK: - LaunchDataServiceMock
+class LaunchDataServiceMock: APICLient {
+    
+    private let launchData: [LaunchData] = [
+        LaunchData(missionName: "Mission Test 1", launchYear: "2020", links: Links(videoLink: "", imageLink: "")),
+        LaunchData(missionName: "Mission Test 2", launchYear: "2018", links: Links(videoLink: "", imageLink: "")),
+        LaunchData(missionName: "Mission Test 3", launchYear: "2021", links: Links(videoLink: "", imageLink: ""))
+    ]
+    
+    override func getLaunchData() {
+        delegate?.didReceiveLaunchData(launchData)
     }
+    
+}
 
+// MARK: - LaunchListViewMock
+class LaunchListViewMock: LaunchListViewDelegate {
+    func setLaunchData() {}
+    
+    func showError(title: String, message: String) {}
 }
